@@ -1,12 +1,9 @@
-# Due Bill 🧾
+# Baki 🧾
 
-**Due Bill** is a simple, private, offline-first mobile app for tracking what you owe at your local shops — tea stalls, grocery stores, coffee shops, anywhere you run a tab. Built with React Native (Expo), with all data stored locally on-device.
+**Baki** is a simple, private, offline-first mobile app for tracking what you owe at your local shops — tea stalls, grocery stores, coffee shops, anywhere you run a tab. Built with React Native (Expo), with all data stored locally on-device.
 
 This repo contains both the **mobile app** and its **marketing landing page**.
 
-<p align="center">
-  <img src="./assets/marketing-banner.png" alt="Due Bill app preview" width="600" />
-</p>
 
 ---
 
@@ -117,7 +114,7 @@ When the build finishes, download the `.apk` from the link EAS prints (or from y
 
 ## 🌐 Landing page
 
-## **[Landing Page](https://jahid757.github.io/baki-apk) ** is a single, self-contained HTML file (no build step, no dependencies) — the banner image is embedded as base64, so you can host it anywhere: GitHub Pages, Netlify, Vercel, or any static file host.
+## <b>[Landing Page](https://jahid757.github.io/baki-apk)</b> is a single, self-contained HTML file (no build step, no dependencies) — the banner image is embedded as base64, so you can host it anywhere: GitHub Pages, Netlify, Vercel, or any static file host.
 
 Before publishing, update the download button links inside the file:
 

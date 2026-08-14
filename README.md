@@ -1,71 +1,159 @@
-# Due Bill — track what you owe at your local shops
+# Due Bill 🧾
 
-A simple Expo (React Native) app for tracking running credit ("due") at shops
-you frequent — tea stalls, coffee shops, corner stores, etc. All data is
-stored locally on your device with AsyncStorage; nothing is sent anywhere.
+**Due Bill** is a simple, private, offline-first mobile app for tracking what you owe at your local shops — tea stalls, grocery stores, coffee shops, anywhere you run a tab. Built with React Native (Expo), with all data stored locally on-device.
 
-## How it works
+This repo contains both the **mobile app** and its **marketing landing page**.
 
-- **Add a shop** (tap the `+` button on the Shops screen) — e.g. "Rahim Tea
-  Stall".
-- Inside a shop, **add products with prices** once (e.g. Tea — ৳15,
-  Coffee — ৳40). These become quick-add buttons.
-- Every time you get something, **tap the product button** — the price is
-  instantly added to your due for that shop, with a timestamp.
-- **Make a payment** any time — enter a partial amount to reduce the due, or
-  tap "Pay full amount" to clear it back to zero.
-- The **History** tab shows every purchase and payment across all shops, plus
-  your total spend this month.
-- Long-press a shop to delete it, or long-press a product to remove it from
-  the quick-add list.
+<p align="center">
+  <img src="./assets/marketing-banner.png" alt="Due Bill app preview" width="600" />
+</p>
 
-## Setup
+---
 
-1. Install [Node.js](https://nodejs.org) (18+) if you don't have it.
-2. Unzip this project and open a terminal in the folder.
-3. Install dependencies:
-   ```bash
-   npm install
-   ```
-4. Start the app:
-   ```bash
-   npx expo start
-   ```
-5. Install the **Expo Go** app on your phone (App Store / Play Store), then
-   scan the QR code shown in the terminal / browser tab. The app opens on
-   your phone instantly — no build step needed.
+## ✨ Features
 
-   Alternatively, press `a` for an Android emulator or `i` for an iOS
-   simulator if you have one set up, or `w` to run in a browser.
+- 🏪 **Multiple shops** — track dues separately for every shop you visit
+- ⚡ **One-tap purchases** — save your usual items (tea, coffee, groceries) as quick-add buttons with preset prices
+- 💳 **Flexible payments** — pay in full or make partial payments to reduce a due
+- 🔔 **Due limit alerts** — set a warning limit per shop (or a global default) and get a local notification when you're close to or over it
+- 📝 **Notes on transactions** — attach a note to any entry, e.g. "borrowed for a friend"
+- 🔍 **Search** — quickly find a shop or a past transaction across your whole history
+- 📊 **Spending overview** — see total dues, and how much you've spent this week/month
+- 🔒 **Fully private** — no account, no server, no internet required. All data lives in `AsyncStorage` on your device.
 
-## Changing the currency symbol
+---
 
-Open `src/theme.js` and change the `CURRENCY` constant (defaults to `৳`).
+## 📱 Tech stack
 
-## Project structure
+| Layer | Choice |
+|---|---|
+| Framework | [Expo](https://expo.dev) (React Native) |
+| Local storage | `@react-native-async-storage/async-storage` |
+| Notifications | `expo-notifications` (local, on-device only) |
+| Icons | `@expo/vector-icons` |
+| Build/distribution | [EAS Build](https://docs.expo.dev/build/introduction/) (APK) |
+
+No backend, no database server, no API keys required.
+
+---
+
+## 📂 Repo structure
 
 ```
-App.js                        Root component, simple tab/screen switching
-src/
-  theme.js                    Colors, spacing, currency symbol
-  storage.js                  All AsyncStorage read/write logic
-  screens/
-    ShopsScreen.js             List of shops + total due
-    ShopDetailScreen.js        Quick-add buttons, payment, per-shop history
-    HistoryScreen.js           All transactions across shops
-  components/
-    AddShopModal.js
-    AddProductModal.js
-    PaymentModal.js
-    BottomNav.js
+.
+├── due-bill-app/              # The Expo/React Native app
+│   ├── App.js
+│   ├── app.json
+│   ├── package.json
+│   ├── src/
+│   │   ├── storage.js         # AsyncStorage read/write logic
+│   │   ├── notifications.js   # Local due-limit alert notifications
+│   │   ├── dueAlerts.js       # Warning-limit threshold logic
+│   │   ├── theme.js           # Colors, spacing, currency symbol
+│   │   ├── screens/           # Shops, ShopDetail, History screens
+│   │   └── components/        # Modals, BottomNav, etc.
+│   └── assets/                # icon.png, adaptive-icon.png, splash-icon.png
+│
+├── landing-page/
+│   └── due-bill-landing.html  # Self-contained marketing landing page
+│
+├── assets/
+│   ├── icon.png
+│   ├── adaptive-icon.png
+│   ├── favicon.png
+│   └── marketing-banner.png
+│
+└── README.md
 ```
 
-## Notes / ideas for later
+> Adjust the tree above if your local folder layout differs — the important part is that `due-bill-app/` is a standalone Expo project.
 
-- Data is per-device only (AsyncStorage). If you want it to sync across
-  devices or survive an app reinstall, you'd need to add a backend or
-  cloud backup later.
-- Long-press actions currently ask for confirmation before deleting.
-- If your shop list grows large, consider switching `storage.js` from
-  AsyncStorage to SQLite (`expo-sqlite`) — the function signatures can stay
-  the same, only the internals change.
+---
+
+## 🚀 Running the app locally
+
+```bash
+cd due-bill-app
+npm install
+npx expo start
+```
+
+Scan the QR code with the **Expo Go** app (Android/iOS) to run it on your phone instantly — no build step needed for development.
+
+---
+
+## 📦 Building an installable APK
+
+This project uses **EAS Build** to produce a standalone Android APK (no Play Store needed for sideloading):
+
+```bash
+npm install -g eas-cli
+eas login
+cd due-bill-app
+eas build:configure
+```
+
+Make sure your `eas.json` requests an APK for the preview profile:
+
+```json
+{
+  "build": {
+    "preview": {
+      "android": { "buildType": "apk" }
+    }
+  }
+}
+```
+
+Then build:
+
+```bash
+eas build -p android --profile preview
+```
+
+When the build finishes, download the `.apk` from the link EAS prints (or from your [expo.dev](https://expo.dev) dashboard) and install it on your device.
+
+---
+
+## 🌐 Landing page
+
+## **[Landing Page](https://jahid757.github.io/baki-apk) ** is a single, self-contained HTML file (no build step, no dependencies) — the banner image is embedded as base64, so you can host it anywhere: GitHub Pages, Netlify, Vercel, or any static file host.
+
+Before publishing, update the download button links inside the file:
+
+```html
+<a class="btn-download" href="Baki.apk" download="baki.apk">
+```
+
+Replace `Baki.apk` with a permanent link to your built APK — e.g. a GitHub Release asset URL.
+
+### Deploying to GitHub Pages
+
+```bash
+# from the repo root
+git add landing-page/due-bill-landing.html
+git commit -m "Add landing page"
+git push
+```
+
+Then in **Settings → Pages**, set the source to the branch/folder containing `index.html` (or rename it to `index.html` in a `docs/` folder for the simplest setup).
+
+---
+
+## 🗺️ Roadmap ideas
+
+- [ ] Backup & restore (export/import all data as a file)
+- [ ] App lock (PIN/biometric)
+- [ ] Spending categories across shops
+- [ ] Light theme toggle
+- [ ] Multi-currency support
+
+---
+
+## 📄 License
+
+MIT — free to use, modify, and distribute.
+
+---
+
+<p align="center">Made for shopkeepers &amp; shoppers who are tired of forgetting who owes what. 🫖</p>

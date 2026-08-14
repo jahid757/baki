@@ -52,7 +52,7 @@ No backend, no database server, no API keys required.
 │   └── assets/                # icon.png, adaptive-icon.png, splash-icon.png
 │
 ├── landing-page/
-│   └── due-bill-landing.html  # Self-contained marketing landing page
+│   └── index.html  # Self-contained marketing landing page
 │
 ├── assets/
 │   ├── icon.png
@@ -70,9 +70,9 @@ No backend, no database server, no API keys required.
 ## 🚀 Running the app locally
 
 ```bash
-cd due-bill-app
+cd baki
 npm install
-npx expo start
+npm start
 ```
 
 Scan the QR code with the **Expo Go** app (Android/iOS) to run it on your phone instantly — no build step needed for development.

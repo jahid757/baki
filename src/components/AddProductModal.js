@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { addProduct } from '../storage';
-import { colors, spacing } from '../theme';
+import { useApp , spacing} from '../ThemeContext';
 
 export default function AddProductModal({ visible, shopId, onClose, onAdded }) {
+  const { colors } = useApp();
+  const styles = makeStyles(colors);
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
 
@@ -28,6 +30,7 @@ export default function AddProductModal({ visible, shopId, onClose, onAdded }) {
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.overlay}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={handleClose} />
         <View style={styles.sheet}>
           <Text style={styles.title}>Add product</Text>
           <TextInput
@@ -59,17 +62,18 @@ export default function AddProductModal({ visible, shopId, onClose, onAdded }) {
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
-  sheet: { backgroundColor: colors.card, padding: spacing.lg, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
-  title: { color: colors.text, fontSize: 18, fontWeight: '700', marginBottom: spacing.md },
-  input: {
-    backgroundColor: colors.cardAlt,
-    color: colors.text,
-    borderRadius: 10,
-    padding: spacing.md,
-    fontSize: 16,
-    borderWidth: 1,
+const makeStyles = (colors) => {
+  return StyleSheet.create({
+    overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
+    sheet: { backgroundColor: colors.card, padding: spacing.lg, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
+    title: { color: colors.text, fontSize: 18, fontWeight: '700', marginBottom: spacing.md },
+    input: {
+      backgroundColor: colors.cardAlt,
+      color: colors.text,
+      borderRadius: 10,
+      padding: spacing.md,
+      fontSize: 16,
+      borderWidth: 1,
     borderColor: colors.border,
   },
   row: { flexDirection: 'row', marginTop: spacing.md, gap: spacing.sm },
@@ -79,3 +83,4 @@ const styles = StyleSheet.create({
   cancelText: { color: colors.textMuted, fontWeight: '600' },
   saveText: { color: '#fff', fontWeight: '700' },
 });
+}

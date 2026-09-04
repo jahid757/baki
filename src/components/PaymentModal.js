@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, Pressable, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { addTransaction } from '../storage';
-import { colors, spacing, CURRENCY } from '../theme';
+import { useApp ,spacing } from '../ThemeContext';
 
 export default function PaymentModal({ visible, shopId, currentDue, onClose, onPaid }) {
+  const { colors,currency } = useApp();
+  const styles = makeStyles(colors);
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
 
@@ -17,16 +19,24 @@ export default function PaymentModal({ visible, shopId, currentDue, onClose, onP
   const handlePay = async (payAmount) => {
     const numAmount = parseFloat(payAmount);
     if (isNaN(numAmount) || numAmount <= 0) return;
-    await addTransaction({ shopId, type: 'payment', amount: numAmount, note: note.trim() || null });
-    onPaid();
+    if (numAmount > currentDue) {
+      Alert.alert(
+        'Amount exceeds current due',
+        `Your current due is ${currency}${currentDue.toFixed(2)}. You cannot pay more than this amount.`
+      );
+      return;
+    }
+    const tx = await addTransaction({ shopId, type: 'payment', amount: numAmount, note: note.trim() || null });
+    onPaid(tx);
   };
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.overlay}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         <View style={styles.sheet}>
           <Text style={styles.title}>Make a payment</Text>
-          <Text style={styles.subtitle}>Current due: {CURRENCY}{currentDue.toFixed(2)}</Text>
+          <Text style={styles.subtitle}>Current due: {currency}{currentDue.toFixed(2)}</Text>
           <TextInput
             style={styles.input}
             placeholder="Amount"
@@ -44,7 +54,7 @@ export default function PaymentModal({ visible, shopId, currentDue, onClose, onP
           />
           {currentDue > 0 && (
             <TouchableOpacity style={styles.fullBtn} onPress={() => handlePay(currentDue)}>
-              <Text style={styles.fullBtnText}>Pay full amount ({CURRENCY}{currentDue.toFixed(2)})</Text>
+              <Text style={styles.fullBtnText}>Pay full amount ({currency}{currentDue.toFixed(2)})</Text>
             </TouchableOpacity>
           )}
           <View style={styles.row}>
@@ -61,17 +71,18 @@ export default function PaymentModal({ visible, shopId, currentDue, onClose, onP
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
-  sheet: { backgroundColor: colors.card, padding: spacing.lg, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
-  title: { color: colors.text, fontSize: 18, fontWeight: '700' },
-  subtitle: { color: colors.textMuted, marginTop: 4, marginBottom: spacing.md },
-  input: {
-    backgroundColor: colors.cardAlt,
-    color: colors.text,
-    borderRadius: 10,
-    padding: spacing.md,
-    fontSize: 16,
+const makeStyles = (colors) => {
+  return StyleSheet.create({
+    overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
+    sheet: { backgroundColor: colors.card, padding: spacing.lg, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
+    title: { color: colors.text, fontSize: 18, fontWeight: '700' },
+    subtitle: { color: colors.textMuted, marginTop: 4, marginBottom: spacing.md },
+    input: {
+      backgroundColor: colors.cardAlt,
+      color: colors.text,
+      borderRadius: 10,
+      padding: spacing.md,
+      fontSize: 16,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -92,3 +103,4 @@ const styles = StyleSheet.create({
   cancelText: { color: colors.textMuted, fontWeight: '600' },
   saveText: { color: '#fff', fontWeight: '700' },
 });
+}

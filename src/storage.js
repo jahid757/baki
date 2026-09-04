@@ -8,6 +8,9 @@ const KEYS = {
 };
 
 const generateId = () => `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+const MAX_PINNED = 3;
+
+
 
 // ---------------- Shops ----------------
 export async function getShops() {
@@ -44,6 +47,35 @@ export async function updateShopLimit(shopId, warningLimit) {
   await saveShops(updatedShops);
 
   return updatedShops.find((shop) => shop.id === shopId);
+}
+
+// Call this whenever a purchase/payment is recorded for a shop —
+// used to sort "last used" shops to the top of the list.
+export async function touchShopLastUsed(shopId) {
+  const shops = await getShops();
+  const updated = shops.map((s) => (s.id === shopId ? { ...s, lastUsedAt: Date.now() } : s));
+  await saveShops(updated);
+}
+
+// Pins/unpins a shop. Max 3 pinned at once.
+// Returns { success: true } or { success: false, reason: 'limit' | 'not_found' }
+export async function toggleShopPin(shopId) {
+  const shops = await getShops();
+  const target = shops.find((s) => s.id === shopId);
+  if (!target) return { success: false, reason: 'not_found' };
+
+  if (!target.pinned) {
+    const pinnedCount = shops.filter((s) => s.pinned).length;
+    if (pinnedCount >= MAX_PINNED) {
+      return { success: false, reason: 'limit' };
+    }
+  }
+
+  const updated = shops.map((s) =>
+    s.id === shopId ? { ...s, pinned: !s.pinned, pinnedAt: !s.pinned ? Date.now() : null } : s
+  );
+  await saveShops(updated);
+  return { success: true };
 }
 
 export async function deleteShop(shopId) {
@@ -115,10 +147,14 @@ export async function getTransactionsByShop(shopId) {
   return transactions.filter((t) => t.shopId === shopId).sort((a, b) => b.timestamp - a.timestamp);
 }
 
+
 export function computeDue(transactions) {
   return transactions.reduce((sum, t) => (t.type === 'purchase' ? sum + t.amount : sum - t.amount), 0);
 }
-
+export async function deleteTransaction(transactionId) {
+  const transactions = await getTransactions();
+  await saveTransactions(transactions.filter((t) => t.id !== transactionId));
+}
 export async function getDuesByShop() {
   const transactions = await getTransactions();
   const map = {};
@@ -188,8 +224,20 @@ export async function clearAllData() {
 
 // added 
 
+// Default settings for the app. These will be used if no settings are saved in AsyncStorage.
+// ---------------- Settings ----------------
+
 const DEFAULT_SETTINGS = {
   defaultWarningLimit: null,
+  theme: 'dark',
+  currency: '\u09f3',
+
+  appLock: {
+    enabled: false,
+    pin: null,
+    question: null,
+    answer: null,
+  },
 };
 
 export async function getSettings() {
@@ -200,9 +248,17 @@ export async function getSettings() {
   }
 
   try {
+    const saved = JSON.parse(raw);
+
     return {
       ...DEFAULT_SETTINGS,
-      ...JSON.parse(raw),
+      ...saved,
+
+      // Make sure old app-lock data remains compatible
+      appLock: {
+        ...DEFAULT_SETTINGS.appLock,
+        ...(saved.appLock || {}),
+      },
     };
   } catch (error) {
     console.warn('Failed to parse settings:', error);
@@ -224,4 +280,103 @@ export async function saveSettings(settings) {
   );
 
   return updatedSettings;
+}
+
+export async function setTheme(theme) {
+  return saveSettings({ theme });
+}
+
+export async function setCurrency(currency) {
+  return saveSettings({ currency });
+}
+
+
+// ---------------- App Lock ----------------
+
+export async function setAppLockPin(pin, question, answer) {
+  const cleanPin = String(pin).trim();
+  const cleanQuestion = String(question).trim();
+  const cleanAnswer = String(answer).trim().toLowerCase();
+
+  return saveSettings({
+    appLock: {
+      enabled: true,
+      pin: cleanPin,
+      question: cleanQuestion,
+      answer: cleanAnswer,
+    },
+  });
+}
+
+export async function disableAppLock() {
+  return saveSettings({
+    appLock: {
+      enabled: false,
+      pin: null,
+      question: null,
+      answer: null,
+    },
+  });
+}
+
+export async function verifyAppLockPin(pin) {
+  const settings = await getSettings();
+
+  return (
+    !!settings.appLock?.enabled &&
+    settings.appLock?.pin === String(pin).trim()
+  );
+}
+
+export async function getAppLockRecoveryQuestion() {
+  const settings = await getSettings();
+
+  if (!settings.appLock?.enabled) {
+    return null;
+  }
+
+  return settings.appLock?.question || null;
+}
+
+export async function verifyAppLockAnswer(answer) {
+  const settings = await getSettings();
+
+  if (!settings.appLock?.enabled) {
+    return false;
+  }
+
+  const savedAnswer = String(
+    settings.appLock?.answer || ''
+  )
+    .trim()
+    .toLowerCase();
+
+  const enteredAnswer = String(answer || '')
+    .trim()
+    .toLowerCase();
+
+  return savedAnswer !== '' && savedAnswer === enteredAnswer;
+}
+
+export async function resetAppLockPin(newPin) {
+  const settings = await getSettings();
+
+  if (!settings.appLock?.enabled) {
+    return false;
+  }
+
+  const cleanPin = String(newPin).trim();
+
+  if (!cleanPin) {
+    return false;
+  }
+
+  await saveSettings({
+    appLock: {
+      ...settings.appLock,
+      pin: cleanPin,
+    },
+  });
+
+  return true;
 }

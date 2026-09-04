@@ -1,14 +1,19 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing } from '../theme';
+// import { spacing } from '../theme';
+import { useApp,spacing } from '../ThemeContext';
 
 const TABS = [
   { key: 'shops', label: 'Shops', icon: 'storefront', iconOutline: 'storefront-outline' },
   { key: 'history', label: 'History', icon: 'time', iconOutline: 'time-outline' },
+  { key: 'settings', label: 'Settings', icon: 'settings', iconOutline: 'settings-outline' },
 ];
 
 export default function BottomNav({ tab, onChange }) {
+  const { colors } = useApp();
+  const styles = makeStyles(colors);
+
   return (
     <View style={styles.wrapper}>
       <View style={styles.bar}>
@@ -22,7 +27,7 @@ export default function BottomNav({ tab, onChange }) {
               onPress={() => onChange(t.key)}
             >
               {active && <View />}
-              <View style={[ active && styles.iconWrapActive]}>
+              <View style={[styles.iconWrap, active && styles.iconWrapActive]}>
                 <Ionicons
                   name={active ? t.icon : t.iconOutline}
                   size={22}
@@ -38,60 +43,40 @@ export default function BottomNav({ tab, onChange }) {
   );
 }
 
-const styles = StyleSheet.create({
-  wrapper: {
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.xs,
-    paddingBottom: spacing.sm,
-    backgroundColor: colors.bg,
-  },
-  bar: {
-    flexDirection: 'row',
-    backgroundColor: colors.card,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 10,
-  },
-  item: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.xs,
-  },
-  activeDot: {
-    position: 'absolute',
-    top: -2,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.primary,
-  },
-  iconWrap: {
-    width: 44,
-    height: 32,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconWrapActive: {
-    backgroundColor: colors.cardAlt,
-  },
-  label: {
-    fontSize: 11,
-    color: colors.textMuted,
-    fontWeight: '600',
-    marginTop: 3,
-    letterSpacing: 0.2,
-  },
-  labelActive: {
-    color: colors.primary,
-    fontWeight: '700',
-  },
-});
+function makeStyles(colors) {
+  return StyleSheet.create({
+    wrapper: {
+      paddingHorizontal: spacing.md,
+      paddingTop: spacing.xs,
+      paddingBottom: spacing.sm,
+      backgroundColor: colors.bg,
+    },
+    bar: {
+      flexDirection: 'row',
+      backgroundColor: colors.card,
+      borderRadius: 22,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.sm,
+      shadowColor: '#000',
+      shadowOpacity: 0.3,
+      shadowRadius: 14,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 10,
+    },
+    item: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.xs },
+    // activeDot: {
+    //   position: 'absolute',
+    //   top: -2,
+    //   width: 4,
+    //   height: 4,
+    //   borderRadius: 2,
+    //   backgroundColor: colors.primary,
+    // },
+    iconWrap: { width: 44, height: 32, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+    iconWrapActive: { backgroundColor: colors.cardAlt },
+    label: { fontSize: 11, color: colors.textMuted, fontWeight: '600', marginTop: 3, letterSpacing: 0.2 },
+    labelActive: { color: colors.primary, fontWeight: '700' },
+  });
+}

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { colors, spacing, CURRENCY } from '../theme';
+import { Modal, View, Text, TextInput, TouchableOpacity, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { useApp,spacing  } from '../ThemeContext';
 
 export default function SetLimitModal({ visible, currentLimit, onClose, onSave }) {
+  const { colors,currency } = useApp();
+  const styles = makeStyles(colors);
   const [limit, setLimit] = useState('');
 
   useEffect(() => {
@@ -17,6 +19,7 @@ export default function SetLimitModal({ visible, currentLimit, onClose, onSave }
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.overlay}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         <View style={styles.sheet}>
           <Text style={styles.title}>Set due warning limit</Text>
           <Text style={styles.subtitle}>
@@ -24,7 +27,7 @@ export default function SetLimitModal({ visible, currentLimit, onClose, onSave }
           </Text>
           <TextInput
             style={styles.input}
-            placeholder={`e.g. 300 (${CURRENCY})`}
+            placeholder={`e.g. 300 (${currency})`}
             placeholderTextColor={colors.textMuted}
             keyboardType="decimal-pad"
             value={limit}
@@ -44,12 +47,13 @@ export default function SetLimitModal({ visible, currentLimit, onClose, onSave }
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
-  sheet: { backgroundColor: colors.card, padding: spacing.lg, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
-  title: { color: colors.text, fontSize: 18, fontWeight: '700' },
-  subtitle: { color: colors.textMuted, fontSize: 13, marginTop: 4, marginBottom: spacing.md },
-  input: {
+const makeStyles = (colors) => {
+  return StyleSheet.create({
+    overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
+    sheet: { backgroundColor: colors.card, padding: spacing.lg, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
+    title: { color: colors.text, fontSize: 18, fontWeight: '700' },
+    subtitle: { color: colors.textMuted, fontSize: 13, marginTop: 4, marginBottom: spacing.md },
+    input: {
     backgroundColor: colors.cardAlt,
     color: colors.text,
     borderRadius: 10,
@@ -65,3 +69,4 @@ const styles = StyleSheet.create({
   cancelText: { color: colors.textMuted, fontWeight: '600' },
   saveText: { color: '#fff', fontWeight: '700' },
 });
+}

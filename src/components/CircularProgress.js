@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { colors } from '../theme';
+// import { colors } from '../theme';
+import { useApp, } from '../theme';
 
 export default function CircularProgress({
   size = 76,
@@ -11,6 +12,8 @@ export default function CircularProgress({
   trackColor = colors.border,
   caption = '',
 }) {
+  const { colors, } = useApp();
+const styles = makeStyles(colors); 
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const clamped = Math.max(0, Math.min(100, percentage));
@@ -44,8 +47,10 @@ export default function CircularProgress({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => {
+  return StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   percentText: { color: colors.text, fontSize: 15, fontWeight: '700' },
   caption: { color: colors.textMuted, fontSize: 11, marginTop: 6, textAlign: 'center' },
 });
+}
